@@ -3,51 +3,64 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FaBars, FaTimes, FaLeaf } from "react-icons/fa"; // Dodao sam FaLeaf
+import { FaBars, FaTimes, FaLeaf } from "react-icons/fa";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
   const navLinks = [
-    { name: "O nama", href: "/onama" },
+    { name: "Agenda", href: "/agenda" },
     { name: "Govornici", href: "/podcast" },
     { name: "Aktivnosti", href: "/blog" },
     { name: "Galerija", href: "/onama" },
-    { name: "Partneri", href: "/onama" },
-    { name: "Kontakt", href: "/kontakt", isButton: true }, // Označio sam Kontakt kao dugme
+    { name: "Partneri", href: "/partneri" },
+    { name: "Registruj se", href: "/kontakt", isButton: true },
   ];
 
   const closeMenu = () => setIsOpen(false);
 
   return (
-    // Dodat backdrop-blur i blago providna boja za "stakleni" efekat
     <nav className="bg-[#0b1120]/90 backdrop-blur-md border-b border-white/10 sticky top-0 z-50 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-24">
           
-          {/* --- LOGO --- */}
+          {/* --- LOGO SEKCIJA --- */}
           <Link 
             href="/" 
-            className="flex items-center gap-2 group" 
+            className="flex items-center gap-4 group" 
             onClick={closeMenu}
           >
-            <div className="bg-green-500/10 p-2 rounded-lg group-hover:bg-green-500/20 transition-colors">
-                <FaLeaf className="text-green-500 text-xl md:text-2xl" />
+            {/* Ikonica Lista - sakrivena na najmanjim ekranima, vidljiva na sm */}
+            <div className="bg-white/5 p-3 rounded-xl border border-white/10 group-hover:border-green-500/50 group-hover:bg-green-500/10 transition-all duration-300 hidden sm:block">
+                <FaLeaf className="text-green-500 text-2xl transform group-hover:rotate-12 transition-transform duration-300" />
             </div>
-            <div className="flex flex-col">
-                <h1 className="text-lg md:text-xl font-bold tracking-wider uppercase leading-none text-white">
-                  Balkan <span className="text-green-500">Green</span>
-                </h1>
-                <span className="text-[10px] md:text-xs text-gray-400 tracking-[0.2em] uppercase">Summit</span>
+
+            {/* Tekstualni dio Loga */}
+            <div className="flex flex-col items-center justify-center leading-none select-none relative pt-2">
+                
+                {/* Gornji red: BALKAN */}
+                <span className="text-white font-black text-2xl md:text-3xl uppercase tracking-tighter transform rotate-6 translate-y-2 translate-x-2 z-0 text-shadow-sm">
+                  Balkan
+                </span>
+                
+                {/* Srednji red: GREEN */}
+                <span className="text-green-500 font-black text-4xl md:text-5xl tracking-tighter -mt-1 relative z-10 drop-shadow-2xl">
+                  GREEN
+                </span>
+                
+                {/* Donji red: SUMMIT */}
+                <span className="text-white font-bold text-lg md:text-xl uppercase tracking-[0.35em] -mt-2 ml-1">
+                  Summit
+                </span>
             </div>
           </Link>
 
-          {/* --- DESKTOP MENI --- */}
-          <div className="hidden md:flex items-center gap-8">
+          {/* --- DESKTOP MENI (Samo na LG i većim ekranima) --- */}
+          {/* Promijenjeno: md:flex -> lg:flex */}
+          <div className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => (
               link.isButton ? (
-                // Poseban dizajn za KONTAKT dugme
                 <Link
                   key={link.name}
                   href={link.href}
@@ -56,7 +69,6 @@ const Navbar = () => {
                   {link.name}
                 </Link>
               ) : (
-                // Standardni linkovi sa hover animacijom
                 <Link
                   key={link.name}
                   href={link.href}
@@ -67,7 +79,6 @@ const Navbar = () => {
                   } text-sm font-medium uppercase tracking-wide transition-colors`}>
                     {link.name}
                   </span>
-                  {/* Linija koja se pojavljuje ispod */}
                   <span className={`absolute bottom-0 left-0 h-0.5 bg-green-500 transition-all duration-300 ease-out ${
                     pathname === link.href ? "w-full" : "w-0 group-hover:w-full"
                   }`} />
@@ -76,8 +87,9 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* --- HAMBURGER DUGME --- */}
-          <div className="md:hidden flex items-center">
+          {/* --- HAMBURGER DUGME (Vidljivo na tabletima i mobitelima) --- */}
+          {/* Promijenjeno: md:hidden -> lg:hidden */}
+          <div className="lg:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="text-gray-300 hover:text-green-500 focus:outline-none p-2 transition-colors"
@@ -90,18 +102,19 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* --- MOBILNI MENI --- */}
-      {/* Overlay pozadina */}
+      {/* --- MOBILNI / TABLET MENI OVERLAY --- */}
+      {/* Promijenjeno: md:hidden -> lg:hidden */}
       <div 
-        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 ${
             isOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
         }`}
         onClick={closeMenu}
       />
 
-      {/* Slide-in meni */}
+      {/* --- MOBILNI / TABLET MENI SADRŽAJ --- */}
+      {/* Promijenjeno: md:hidden -> lg:hidden */}
       <div
-        className={`fixed top-[80px] left-0 right-0 bg-[#0b1120] border-b border-white/10 shadow-2xl md:hidden transform transition-transform duration-300 ease-in-out z-50 ${
+        className={`fixed top-[96px] left-0 right-0 bg-[#0b1120] border-b border-white/10 shadow-2xl lg:hidden transform transition-transform duration-300 ease-in-out z-50 ${
           isOpen ? "translate-y-0" : "-translate-y-[150%]"
         }`}
       >
@@ -115,8 +128,8 @@ const Navbar = () => {
                 link.isButton 
                 ? "bg-green-600 text-white shadow-lg mt-4 hover:bg-green-500" 
                 : pathname === link.href 
-                    ? "text-green-400 bg-white/5" 
-                    : "text-gray-300 hover:text-white hover:bg-white/5"
+                  ? "text-green-400 bg-white/5" 
+                  : "text-gray-300 hover:text-white hover:bg-white/5"
               }`}
             >
               {link.name}

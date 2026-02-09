@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { useSearchParams } from "next/navigation"; // 1. NOVO: Uvoz za čitanje URL parametara
 import Image from "next/image";
 import Link from "next/link";
 import { 
@@ -26,12 +27,13 @@ interface Post {
   type: string; // 'news', 'podcast', 'project'
   video_duration?: string | null;
   guest_name?: string | null;
-  youtube_link?: string | null; // OVO KORISTIMO ZA LINKEDIN LINK KOD GOVORNIKA
+  youtube_link?: string | null; 
 }
 
 export default function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
   
   const { slug } = use(params);
+  const searchParams = useSearchParams(); // 2. NOVO: Inicijalizacija paramsa
 
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
@@ -165,7 +167,7 @@ export default function BlogPost({ params }: { params: Promise<{ slug: string }>
   if (post.type === 'podcast') {
       // GOVORNIK POSTAVKE
       labelText = "Govornik";
-      badgeColorDesktop = "bg-green-600 text-white"; // Zelena kao na karticama
+      badgeColorDesktop = "bg-green-600 text-white"; 
       badgeColorMobile = "bg-green-100 text-green-700";
       backLinkText = "Nazad na aktivnosti";
       backLinkUrl = "/blog";
@@ -175,6 +177,14 @@ export default function BlogPost({ params }: { params: Promise<{ slug: string }>
       badgeColorMobile = "bg-purple-100 text-purple-700";
       backLinkText = "Nazad na projekte";
       backLinkUrl = "/blog"; 
+  }
+
+  // 3. NOVO: Logika za nadjačavanje ako se dolazi sa Agende
+  const source = searchParams.get('source');
+  
+  if (source === 'agenda') {
+      backLinkText = "Nazad na agendu";
+      backLinkUrl = "/agenda"; // NAPOMENA: Ovdje stavi pravi link do agende (npr. /agenda, /raspored ili /)
   }
 
   return (
