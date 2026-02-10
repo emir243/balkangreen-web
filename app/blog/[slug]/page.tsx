@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { useSearchParams } from "next/navigation"; // 1. NOVO: Uvoz za čitanje URL parametara
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { 
@@ -15,6 +15,9 @@ import {
   FaUserTie,
   FaExternalLinkAlt
 } from "react-icons/fa";
+
+// --- OVO SMO DODALI ZA CLOUDFLARE ---
+export const runtime = 'edge';
 
 interface Post {
   id: number;
@@ -33,7 +36,7 @@ interface Post {
 export default function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
   
   const { slug } = use(params);
-  const searchParams = useSearchParams(); // 2. NOVO: Inicijalizacija paramsa
+  const searchParams = useSearchParams();
 
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
@@ -179,12 +182,12 @@ export default function BlogPost({ params }: { params: Promise<{ slug: string }>
       backLinkUrl = "/blog"; 
   }
 
-  // 3. NOVO: Logika za nadjačavanje ako se dolazi sa Agende
+  // Logika za nadjačavanje ako se dolazi sa Agende
   const source = searchParams.get('source');
   
   if (source === 'agenda') {
       backLinkText = "Nazad na agendu";
-      backLinkUrl = "/agenda"; // NAPOMENA: Ovdje stavi pravi link do agende (npr. /agenda, /raspored ili /)
+      backLinkUrl = "/agenda"; 
   }
 
   return (
@@ -310,12 +313,12 @@ export default function BlogPost({ params }: { params: Promise<{ slug: string }>
                  </div>
 
                  <a 
-                    href={post.youtube_link} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="w-full md:w-auto px-8 py-3 bg-blue-700 hover:bg-blue-800 text-white font-bold rounded-full transition-colors flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+                   href={post.youtube_link} 
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   className="w-full md:w-auto px-8 py-3 bg-blue-700 hover:bg-blue-800 text-white font-bold rounded-full transition-colors flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
                  >
-                    Posjeti LinkedIn Profil <FaExternalLinkAlt className="text-sm" />
+                   Posjeti LinkedIn Profil <FaExternalLinkAlt className="text-sm" />
                  </a>
              </div>
          )}
