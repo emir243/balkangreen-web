@@ -1,29 +1,42 @@
-import { prisma } from "@/lib/prisma";
+import { supabase } from "@/lib/supabaseClient"; // 1. Uvozimo Supabase umjesto Prisme
 import AgendaClient from "./AgendaClient";
+
 export const runtime = 'edge';
 export const dynamic = "force-dynamic";
 
 export default async function AgendaPage() {
-  // 1. Povlačimo stavke agende (BEZ include posts, jer relacija više ne postoji)
-  const rawAgendaItems = await prisma.agenda_items.findMany({
-    orderBy: {
-      time: 'asc',
-    },
-  });
+  // 1. Povlačimo stavke agende preko Supabase-a
+  const { data: rawAgendaItems, error: agendaError } = await supabase
+    .from('agenda_items')
+    .select('*')
+    .order('time', { ascending: true });
+
+  if (agendaError) {
+    console.error("Greška pri povlačenju agende:", agendaError);
+  }
+
+  const items = rawAgendaItems || [];
 
   // 2. Sakupljamo sve ID-eve govornika iz svih agenda itema u jedan niz
-  // flatMap pretvara [[1,2], [3], []] u [1, 2, 3]
-  const allSpeakerIds = rawAgendaItems.flatMap((item) => item.speaker_ids);
+  const allSpeakerIds = items.flatMap((item) => item.speaker_ids || []);
 
   // 3. Povlačimo podatke o govornicima koji se nalaze u tom nizu
-  const speakersData = await prisma.posts.findMany({
-    where: {
-      id: { in: allSpeakerIds }, // Prisma zna raditi sa BigInt nizovima ovdje
-    },
-  });
+  let speakersData: any[] = [];
+  if (allSpeakerIds.length > 0) {
+    const { data: posts, error: postsError } = await supabase
+      .from('posts')
+      .select('*')
+      .in('id', allSpeakerIds);
+
+    if (postsError) {
+      console.error("Greška pri povlačenju govornika:", postsError);
+    } else if (posts) {
+      speakersData = posts;
+    }
+  }
 
   // 4. Pripremamo podatke za klijenta (Spajamo agendu i govornike)
-  const agendaItems = rawAgendaItems.map((item) => {
+  const agendaItems = items.map((item) => {
     
     // ČISTIMO OPIS OD HTML TAGOVA
     const cleanDescription = item.description 
@@ -33,7 +46,7 @@ export default async function AgendaPage() {
     // FILTRIRAMO GOVORNIKE ZA OVAJ KONKRETAN ITEM
     // Tražimo govornike čiji se ID nalazi u item.speaker_ids nizu
     const itemSpeakers = speakersData.filter(speaker => 
-      item.speaker_ids.includes(speaker.id)
+      item.speaker_ids && item.speaker_ids.includes(speaker.id)
     );
 
     // Mapiramo govornike u format za frontend
